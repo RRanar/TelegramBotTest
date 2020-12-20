@@ -12,24 +12,11 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/rranar/telegram-api-webapp/tgbot_core"
 )
 
-type Update struct {
-	UpdateId int     `json:"update_id"`
-	Message  Message `json:"message"`
-}
-
-type Message struct {
-	Text string `json:"text"`
-	Chat Chat   `json:"chat"`
-}
-
-type Chat struct {
-	Id int `json:"id"`
-}
-
-func parseTelegramRequest(r *http.Request) (*Update, error) {
-	var update Update
+func parseTelegramRequest(r *http.Request) (*tgbot_core.Update, error) {
+	var update tgbot_core.Update
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 		log.Println("Cannot decode incoming update %s", err.Error())
 		return nil, err
