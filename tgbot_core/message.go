@@ -1,6 +1,7 @@
 package tgbot_core
 
 type Message struct {
-	Text string `json:"text"`
-	Chat Chat   `json:"chat"`
+	Text     string          `json:"text"`
+	Chat     Chat            `json:"chat"`
+	Entities []MessageEntity `json:"entities"`
 }

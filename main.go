@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,9 +16,23 @@ func HandlerTelegramWebhook(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error parsing update, %s", err.Error())
 		return
 	}
+	var telegramResponseBody string
+	var errTelegram error
 
-	if strings.Contains(update.Message.Text, "moroz") {
-		var telegramResponseBody, errTelegram = tgbot_core.SendTextToTelegramChat(update.Message.Chat.Id, "Морозило бродяга!Выгони его из хаты!")
+	if update.Message.Entities != nil {
+		var keyboard tgbot_core.InlineKeyboardMarkup
+		keyboard.InlineKeyboardMarkup = [][]tgbot_core.InlineKeyboardButton{
+			[]tgbot_core.InlineKeyboardButton{{Text: "ClickToPunchMoroz", CallbackData: "tg://19117"}, {Text: "FuckTheWorld", CallbackData: "https://t.me/dvachannel"}},
+		}
+		b, err := json.Marshal(keyboard)
+		if err != nil {
+			log.Printf("Some error on encode occured:%s", err.Error())
+		}
+		telegramResponseBody, errTelegram = tgbot_core.SendTextToTelegramChat(update.Message.Chat.Id, "Шалость удалась", b)
+	}
+
+	if strings.Contains(update.Message.Text, "moroz") || strings.Contains(update.EditedMessage.Text, "haluka") {
+		telegramResponseBody, errTelegram = tgbot_core.SendTextToTelegramChat(update.Message.Chat.Id, "Морозило бродяга!Выгони его из хаты!", nil)
 		if errTelegram != nil {
 			log.Printf("got error from Telegram, response body is %s", errTelegram.Error(), telegramResponseBody)
 		}

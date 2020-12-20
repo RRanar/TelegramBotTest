@@ -21,7 +21,7 @@ func ParseTelegramRequest(r *http.Request) (*Update, error) {
 	return &update, nil
 }
 
-func SendTextToTelegramChat(chatId int, text string) (string, error) {
+func SendTextToTelegramChat(chatId int, text string, keyboard []byte) (string, error) {
 	log.Printf("Sending %s to chat id:%d", text, chatId)
 	var telegramToken, tokenError = getTelegramToken()
 	if tokenError != nil {
@@ -30,12 +30,23 @@ func SendTextToTelegramChat(chatId int, text string) (string, error) {
 	}
 
 	var telegramApi string = "https://api.telegram.org/bot" + telegramToken + "/sendMessage"
-	response, err := http.PostForm(
-		telegramApi,
-		url.Values{
+	var params url.Values
+	if keyboard != nil {
+		params = url.Values{
+			"chat_id":      {strconv.Itoa(chatId)},
+			"text":         {text},
+			"reply_markup": {string(keyboard)},
+		}
+	} else {
+		params = url.Values{
 			"chat_id": {strconv.Itoa(chatId)},
 			"text":    {text},
-		})
+		}
+	}
+
+	response, err := http.PostForm(
+		telegramApi,
+		params)
 	if err != nil {
 		log.Printf("error when posting text to the chat:%s", err.Error())
 		return "", err
@@ -54,7 +65,7 @@ func SendTextToTelegramChat(chatId int, text string) (string, error) {
 }
 
 func getTelegramToken() (string, error) {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		return "", err
 	}
